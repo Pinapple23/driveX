@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Drive X — Air-Powered Vehicle Team</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+  :root {
+    --navy:#0d1b2e;--navy-mid:#1a3a5c;--navy-light:#1e4976;
+    --blue:#378ADD;--blue-light:#7ab8e8;--blue-pale:#c8dff5;
+    --teal:#1D9E75;--amber:#BA7517;--red:#E24B4A;
+    --white:#ffffff;--off-white:#f7f9fc;--muted:#7a8fa6;--border:#dde3ec;--text:#0d1b2e;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Inter',sans-serif;background:var(--off-white);color:var(--text);min-height:100vh;}
+  h1,h2,h3{font-family:'Space Grotesk',sans-serif;}
+
+  /* AUTH */
+  #auth-overlay{position:fixed;inset:0;background:var(--navy);display:flex;align-items:center;justify-content:center;z-index:1000;transition:opacity 0.4s;}
+  .auth-box{background:#fff;border-radius:16px;padding:2.5rem;width:100%;max-width:420px;margin:1rem;max-height:90vh;overflow-y:auto;}
+  .auth-logo{text-align:center;margin-bottom:1.5rem;}
+  .auth-logo .logo-icon{width:52px;height:52px;background:var(--navy);border-radius:14px;display:flex;align-items:center;justify-content:center;margin:0 auto 10px;font-size:24px;}
+  .auth-logo h2{font-size:20px;color:var(--navy);margin-bottom:3px;}
+  .auth-logo p{font-size:12px;color:var(--muted);}
+  .auth-tabs{display:flex;border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:1.25rem;}
+  .auth-tab{flex:1;padding:8px;text-align:center;font-size:13px;font-weight:500;cursor:pointer;color:var(--muted);background:var(--off-white);border:none;transition:all 0.2s;}
+  .auth-tab.active{background:var(--navy);color:white;}
+  .form-group{margin-bottom:0.9rem;}
+  .form-group label{display:block;font-size:11px;font-weight:500;color:var(--muted);margin-bottom:5px;text-transform:uppercase;letter-spacing:0.05em;}
+  .form-group input,.form-group select,.form-group textarea{width:100%;padding:9px 13px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:'Inter',sans-serif;color:var(--text);background:var(--white);outline:none;transition:border-color 0.2s;}
+  .form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--blue);}
+  .form-group textarea{min-height:80px;resize:vertical;}
+  .auth-btn{width:100%;padding:11px;background:var(--navy);color:white;border:none;border-radius:8px;font-size:14px;font-weight:500;font-family:'Space Grotesk',sans-serif;cursor:pointer;transition:background 0.2s;margin-top:0.5rem;}
+  .auth-btn:hover{background:var(--navy-light);}
+  .auth-error{background:#fef2f2;color:#991b1b;border:1px solid #fecaca;border-radius:8px;padding:9px 13px;font-size:13px;margin-bottom:1rem;display:none;}
+  .auth-success{background:#f0fdf4;color:#166534;border:1px solid #bbf7d0;border-radius:8px;padding:9px 13px;font-size:13px;margin-bottom:1rem;display:none;}
+
+  /* NAV */
+  nav{background:var(--navy);padding:0 2rem;display:flex;align-items:center;justify-content:space-between;height:56px;position:sticky;top:0;z-index:100;}
+  .nav-brand{font-family:'Space Grotesk',sans-serif;font-size:16px;font-weight:600;color:white;display:flex;align-items:center;gap:10px;}
+  .nav-brand .dot{width:8px;height:8px;background:var(--blue);border-radius:50%;}
+  .nav-links{display:flex;align-items:center;gap:1.25rem;}
+  .nav-links a{font-size:12px;color:var(--blue-light);text-decoration:none;transition:color 0.2s;}
+  .nav-links a:hover{color:white;}
+  .nav-user{display:flex;align-items:center;gap:10px;}
+  .avatar-sm{width:32px;height:32px;border-radius:50%;background:var(--navy-mid);border:1.5px solid var(--blue);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:var(--blue-light);}
+  .logout-btn{font-size:12px;color:var(--blue-light);background:none;border:1px solid var(--navy-mid);border-radius:6px;padding:4px 10px;cursor:pointer;transition:all 0.2s;}
+  .logout-btn:hover{background:var(--navy-mid);color:white;}
+
+  /* HERO */
+  .hero{background:var(--navy);padding:5rem 2rem 4rem;text-align:center;}
+  .hero-eyebrow{display:inline-block;font-size:11px;font-weight:500;letter-spacing:0.12em;text-transform:uppercase;color:var(--blue);background:rgba(55,138,221,0.1);border:1px solid rgba(55,138,221,0.25);border-radius:20px;padding:5px 16px;margin-bottom:1.5rem;}
+  .hero h1{font-size:clamp(34px,6vw,62px);font-weight:700;color:white;letter-spacing:-1.5px;line-height:1.1;margin-bottom:1rem;}
+  .hero h1 span{color:var(--blue);}
+  .hero-sub{font-size:15px;color:var(--blue-pale);max-width:480px;margin:0 auto 2.5rem;line-height:1.7;}
+  .hero-stats{display:flex;justify-content:center;flex-wrap:wrap;gap:2px;margin-bottom:2.5rem;}
+  .hstat{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);padding:1rem 1.5rem;text-align:center;min-width:100px;}
+  .hstat:first-child{border-radius:10px 0 0 10px;}.hstat:last-child{border-radius:0 10px 10px 0;}
+  .hstat .v{font-size:20px;font-weight:600;color:var(--blue-light);font-family:'Space Grotesk',sans-serif;}
+  .hstat .l{font-size:10px;color:rgba(255,255,255,0.4);margin-top:4px;}
+  .hero-cta{display:inline-flex;align-items:center;gap:8px;background:var(--blue);color:white;padding:12px 24px;border-radius:8px;font-size:14px;font-weight:500;font-family:'Space Grotesk',sans-serif;text-decoration:none;transition:background 0.2s;}
+  .hero-cta:hover{background:#2a6fb5;}
+
+  /* SECTIONS */
+  .section{padding:4rem 2rem;max-width:960px;margin:0 auto;}
+  .section-eyebrow{font-size:11px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:var(--blue);margin-bottom:8px;}
+  .section h2{font-size:26px;font-weight:600;color:var(--navy);margin-bottom:1.5rem;letter-spacing:-0.5px;}
+  .divider{height:1px;background:var(--border);}
+
+  /* FLOW */
+  .flow{display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin-bottom:1.5rem;}
+  .flow-node{background:var(--navy);color:var(--blue-light);font-size:12px;font-weight:500;padding:9px 16px;border-radius:8px;}
+  .flow-arrow{color:var(--blue);font-size:16px;padding:0 2px;}
+
+  /* SPECS */
+  .spec-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:1.5rem;}
+  .spec-card{background:white;border:1px solid var(--border);border-radius:10px;padding:1rem 1.1rem;}
+  .spec-card .sc-l{font-size:11px;color:var(--muted);margin-bottom:4px;}
+  .spec-card .sc-v{font-size:15px;font-weight:600;color:var(--navy);font-family:'Space Grotesk',sans-serif;}
+
+  /* PERF */
+  .perf-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:1.5rem;}
+  .perf-card{background:var(--navy);border-radius:12px;padding:1.5rem;text-align:center;}
+  .perf-card .pc-val{font-size:26px;font-weight:700;color:var(--blue-light);font-family:'Space Grotesk',sans-serif;}
+  .perf-card .pc-lbl{font-size:11px;color:rgba(255,255,255,0.4);margin-top:4px;}
+  .perf-card .pc-best{font-size:11px;color:var(--teal);margin-top:8px;}
+  .bar-wrap{margin-bottom:12px;}
+  .bar-top{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:5px;}
+  .bar-bg{background:var(--border);border-radius:20px;height:6px;overflow:hidden;}
+  .bar-fill{height:6px;border-radius:20px;}
+
+  /* TEAM */
+  .team-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;}
+  .team-card{background:white;border:1px solid var(--border);border-radius:12px;padding:1.1rem;text-align:center;transition:border-color 0.2s,transform 0.2s;}
+  .team-card:hover{border-color:var(--blue);transform:translateY(-2px);}
+  .t-avatar{width:44px;height:44px;border-radius:50%;background:var(--navy);color:var(--blue-light);font-size:14px;font-weight:600;font-family:'Space Grotesk',sans-serif;display:flex;align-items:center;justify-content:center;margin:0 auto 8px;}
+  .team-card .t-name{font-size:12px;font-weight:500;color:var(--navy);margin-bottom:3px;}
+  .team-card .t-id{font-size:11px;color:var(--muted);margin-bottom:3px;}
+  .team-card .t-role{font-size:11px;color:var(--blue);font-weight:500;}
+
+  /* LEADERBOARD */
+  .lb-table{width:100%;border-collapse:collapse;background:white;border-radius:12px;overflow:hidden;border:1px solid var(--border);}
+  .lb-table th{background:var(--navy);color:var(--blue-light);font-size:12px;font-weight:500;padding:12px 16px;text-align:left;letter-spacing:0.05em;}
+  .lb-table td{padding:12px 16px;font-size:13px;border-bottom:1px solid var(--border);color:var(--text);}
+  .lb-table tr:last-child td{border-bottom:none;}
+  .lb-table tr:hover td{background:var(--off-white);}
+  .rank-1{color:var(--amber);font-weight:700;font-size:15px;}
+  .rank-2{color:var(--muted);font-weight:600;}
+  .rank-3{color:#CD7F32;font-weight:600;}
+  .pi-badge{display:inline-block;background:rgba(55,138,221,0.1);color:var(--blue);border:1px solid rgba(55,138,221,0.2);border-radius:20px;padding:2px 10px;font-size:12px;font-weight:500;}
+  .time-badge{display:inline-block;background:rgba(29,158,117,0.1);color:var(--teal);border:1px solid rgba(29,158,117,0.2);border-radius:20px;padding:2px 10px;font-size:12px;font-weight:500;}
+  .status-badge{display:inline-block;border-radius:20px;padding:2px 10px;font-size:11px;font-weight:500;}
+  .status-done{background:rgba(29,158,117,0.1);color:var(--teal);border:1px solid rgba(29,158,117,0.2);}
+  .status-pending{background:rgba(186,117,23,0.1);color:var(--amber);border:1px solid rgba(186,117,23,0.2);}
+  .add-result-btn{margin-top:1rem;padding:9px 18px;background:var(--navy);color:white;border:none;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;font-family:'Space Grotesk',sans-serif;transition:background 0.2s;}
+  .add-result-btn:hover{background:var(--navy-light);}
+  .modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:500;align-items:center;justify-content:center;}
+  .modal-bg.open{display:flex;}
+  .modal{background:white;border-radius:14px;padding:2rem;width:100%;max-width:380px;margin:1rem;}
+  .modal h3{font-size:17px;font-weight:600;color:var(--navy);margin-bottom:1.25rem;}
+  .modal-close{float:right;background:none;border:none;font-size:20px;cursor:pointer;color:var(--muted);margin-top:-4px;}
+
+  /* ORDER FORM */
+  .order-section{background:var(--navy);padding:4rem 2rem;}
+  .order-inner{max-width:760px;margin:0 auto;}
+  .order-inner .section-eyebrow{color:var(--blue);}
+  .order-inner h2{color:white;font-size:26px;margin-bottom:6px;letter-spacing:-0.5px;}
+  .order-sub{color:var(--blue-pale);font-size:14px;margin-bottom:2rem;line-height:1.6;}
+  .order-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  .order-grid .full{grid-column:1/-1;}
+  .o-label{display:block;font-size:11px;font-weight:500;color:var(--blue-light);margin-bottom:5px;text-transform:uppercase;letter-spacing:0.05em;}
+  .o-input{width:100%;padding:10px 13px;border:1px solid var(--navy-mid);border-radius:8px;font-size:13px;font-family:'Inter',sans-serif;color:white;background:rgba(255,255,255,0.06);outline:none;transition:border-color 0.2s;}
+  .o-input:focus{border-color:var(--blue);}
+  .o-input option{background:var(--navy);color:white;}
+  .color-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px;}
+  .color-swatch{width:32px;height:32px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:border-color 0.2s;}
+  .color-swatch.selected{border-color:white;}
+  .feature-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px;}
+  .feature-check{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--blue-pale);cursor:pointer;}
+  .feature-check input{accent-color:var(--blue);width:15px;height:15px;}
+  .submit-order{width:100%;padding:13px;background:var(--blue);color:white;border:none;border-radius:8px;font-size:15px;font-weight:600;font-family:'Space Grotesk',sans-serif;cursor:pointer;transition:background 0.2s;margin-top:1rem;}
+  .submit-order:hover{background:#2a6fb5;}
+  .order-success{display:none;background:rgba(29,158,117,0.15);border:1px solid rgba(29,158,117,0.3);border-radius:10px;padding:1.5rem;text-align:center;margin-top:1rem;}
+  .order-success h3{color:var(--teal);font-size:16px;margin-bottom:6px;}
+  .order-success p{color:var(--blue-pale);font-size:13px;}
+  .orders-list{margin-top:2rem;}
+  .orders-list h3{color:var(--blue-light);font-size:15px;margin-bottom:1rem;}
+  .order-card{background:rgba(255,255,255,0.05);border:1px solid var(--navy-mid);border-radius:10px;padding:1rem 1.25rem;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;}
+  .order-card .oc-name{font-size:14px;font-weight:500;color:white;}
+  .order-card .oc-detail{font-size:12px;color:var(--blue-light);margin-top:3px;}
+  .order-card .oc-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0;}
+
+  /* TRIVIA */
+  .trivia-box{background:var(--navy);border-radius:14px;padding:2rem;}
+  .trivia-box h3{font-size:15px;color:var(--blue-light);margin-bottom:1.5rem;}
+  .trivia-item{border-bottom:1px solid rgba(255,255,255,0.06);padding:13px 0;display:flex;align-items:center;justify-content:space-between;gap:1rem;}
+  .trivia-item:last-child{border-bottom:none;}
+  .trivia-item .q{font-size:13px;color:var(--blue-pale);flex:1;}
+  .reveal-btn{background:var(--navy-mid);color:var(--blue-light);border:1px solid rgba(55,138,221,0.3);border-radius:20px;padding:5px 14px;font-size:12px;font-weight:500;cursor:pointer;white-space:nowrap;transition:all 0.2s;font-family:'Inter',sans-serif;}
+  .reveal-btn:hover{background:var(--navy-light);color:white;}
+  .reveal-btn.revealed{background:rgba(29,158,117,0.15);color:var(--teal);border-color:rgba(29,158,117,0.3);}
+
+  /* DARE */
+  .dare-section{background:var(--navy);padding:4rem 2rem;text-align:center;}
+  .dare-section h2{font-size:30px;font-weight:700;color:white;letter-spacing:-0.5px;margin-bottom:1rem;}
+  .dare-section p{color:var(--blue-pale);margin-bottom:2rem;font-size:15px;}
+  .pi-display{display:inline-block;background:rgba(55,138,221,0.1);border:1px solid rgba(55,138,221,0.3);border-radius:16px;padding:2rem 3rem;margin-bottom:2rem;}
+  .pi-display .pi-val{font-size:52px;font-weight:700;color:var(--blue-light);font-family:'Space Grotesk',sans-serif;line-height:1;}
+  .pi-display .pi-label{font-size:12px;color:var(--muted);margin-top:8px;}
+
+  /* PHOTO UPLOAD */
+  .upload-section{background:white;border:1px solid var(--border);border-radius:14px;padding:1.5rem;margin-top:1.5rem;}
+  .upload-section h3{font-size:15px;font-weight:600;color:var(--navy);margin-bottom:0.75rem;}
+  .drop-zone{border:2px dashed var(--border);border-radius:10px;padding:2rem;text-align:center;cursor:pointer;transition:border-color 0.2s,background 0.2s;}
+  .drop-zone:hover{border-color:var(--blue);background:#f0f7ff;}
+  .drop-zone p{font-size:13px;color:var(--muted);}
+  .drop-zone small{font-size:11px;color:#b0bec5;}
+  #file-input{display:none;}
+  .photo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:8px;margin-top:10px;}
+  .photo-thumb{aspect-ratio:1;border-radius:8px;overflow:hidden;position:relative;border:1px solid var(--border);}
+  .photo-thumb img{width:100%;height:100%;object-fit:cover;}
+  .photo-thumb .rm{position:absolute;top:3px;right:3px;background:rgba(0,0,0,0.6);color:white;border:none;border-radius:50%;width:18px;height:18px;font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+
+  /* INNOV */
+  .innov-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;}
+  .innov-card{background:white;border:1px solid var(--border);border-radius:12px;padding:1.1rem;border-top:3px solid var(--blue);}
+  .innov-card .ic-icon{font-size:20px;margin-bottom:8px;}
+  .innov-card .ic-title{font-size:13px;font-weight:600;color:var(--navy);margin-bottom:5px;}
+  .innov-card .ic-desc{font-size:12px;color:var(--muted);line-height:1.6;}
+
+  footer{background:var(--navy);color:var(--muted);text-align:center;padding:2rem;font-size:12px;line-height:1.8;}
+  footer strong{color:var(--blue-light);}
+
+  @media(max-width:600px){
+    .perf-grid{grid-template-columns:1fr;}
+    .order-grid{grid-template-columns:1fr;}
+    .order-grid .full{grid-column:1;}
+    nav{padding:0 1rem;}
+    .nav-links{display:none;}
+  }
+</style>
+</head>
+<body>
+
+<!-- AUTH OVERLAY -->
+<div id="auth-overlay">
+  <div class="auth-box">
+    <div class="auth-logo">
+      <div class="logo-icon">💨</div>
+      <h2>Drive X</h2>
+      <p>Ain Shams University · Spring 2026</p>
+    </div>
+    <div id="auth-error" class="auth-error"></div>
+    <div id="auth-success" class="auth-success"></div>
+    <div class="auth-tabs">
+      <button class="auth-tab active" onclick="switchAuthTab('login')">Sign in</button>
+      <button class="auth-tab" onclick="switchAuthTab('register')">Register</button>
+    </div>
+    <div id="login-form">
+      <div class="form-group"><label>Username</label><input type="text" id="login-user" placeholder="Enter your username"></div>
+      <div class="form-group"><label>Password</label><input type="password" id="login-pass" placeholder="Enter your password"></div>
+      <button class="auth-btn" onclick="login()">Sign in →</button>
+    </div>
+    <div id="register-form" style="display:none;">
+      <div class="form-group"><label>Full name</label><input type="text" id="reg-name" placeholder="e.g. Daniel Amgad"></div>
+      <div class="form-group"><label>Student ID</label><input type="text" id="reg-id" placeholder="e.g. 22P090"></div>
+      <div class="form-group"><label>Username</label><input type="text" id="reg-user" placeholder="Choose a username"></div>
+      <div class="form-group"><label>Password</label><input type="password" id="reg-pass" placeholder="Choose a password"></div>
+      <div class="form-group">
+        <label>Role</label>
+        <select id="reg-role">
+          <option value="Mechanical">Mechanical</option>
+          <option value="Electrical">Electrical</option>
+          <option value="Fluid dynamics">Fluid dynamics</option>
+          <option value="Software">Software</option>
+          <option value="Manufacturing">Manufacturing</option>
+          <option value="Project manager">Project manager</option>
+          <option value="Guest / Buyer">Guest / Buyer</option>
+        </select>
+      </div>
+      <button class="auth-btn" onclick="register()">Create account →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD RESULT MODAL -->
+<div class="modal-bg" id="result-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">×</button>
+    <h3>Add run result</h3>
+    <div class="form-group"><label>User name</label><input type="text" id="r-name" placeholder="e.g. Omar Abobakr"></div>
+    <div class="form-group"><label>Vehicle / car name</label><input type="text" id="r-car" placeholder="e.g. Drive X"></div>
+    <div class="form-group"><label>Time to complete 10 m (seconds)</label><input type="number" id="r-time" placeholder="e.g. 7.4" step="0.01" min="0"></div>
+    <div class="form-group"><label>Braking distance (meters)</label><input type="number" id="r-brake" placeholder="e.g. 0.8" step="0.01" min="0"></div>
+    <div class="form-group"><label>Vehicle weight (kg)</label><input type="number" id="r-weight" placeholder="e.g. 2.1" step="0.01" min="0"></div>
+    <button class="auth-btn" onclick="addResult()">Save result</button>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-brand"><div class="dot"></div>Drive X</div>
+  <div class="nav-links">
+    <a href="#system">System</a>
+    <a href="#leaderboard">Leaderboard</a>
+    <a href="#performance">Performance</a>
+    <a href="#team">Team</a>
+    <a href="#order">Order your car</a>
+  </div>
+  <div class="nav-user">
+    <div class="avatar-sm" id="nav-avatar">?</div>
+    <span style="font-size:12px;color:var(--blue-light);" id="nav-username">—</span>
+    <button class="logout-btn" onclick="logout()">Sign out</button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-eyebrow">Ain Shams University · Machine Elements Design · Spring 2026</div>
+  <h1>Drive <span>X</span></h1>
+  <p class="hero-sub">An air-powered vehicle engineered for speed, precision braking, and lightweight performance — driven by nothing but compressed air.</p>
+  <div class="hero-stats">
+    <div class="hstat"><div class="v">4 L</div><div class="l">Tank volume</div></div>
+    <div class="hstat"><div class="v">10 bar</div><div class="l">Max pressure</div></div>
+    <div class="hstat"><div class="v">10 m</div><div class="l">Course length</div></div>
+    <div class="hstat"><div class="v">Al</div><div class="l">Chassis material</div></div>
+    <div class="hstat"><div class="v">6</div><div class="l">Team members</div></div>
+  </div>
+  <a href="#system" class="hero-cta">Explore the design ↓</a>
+</section>
+
+<!-- SYSTEM -->
+<section class="section" id="system">
+  <div class="section-eyebrow">3.0 — Fluid dynamics</div>
+  <h2>Propulsion system</h2>
+  <div class="flow">
+    <div class="flow-node">💨 Air tank (4 L)</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node">🔧 Control valve</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node">⚡ Convergent nozzle</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node">🌬 Atmosphere</div>
+  </div>
+  <div class="spec-grid">
+    <div class="spec-card"><div class="sc-l">Tank volume</div><div class="sc-v">4 L</div></div>
+    <div class="spec-card"><div class="sc-l">Initial pressure</div><div class="sc-v">10 bar abs.</div></div>
+    <div class="spec-card"><div class="sc-l">Nozzle type</div><div class="sc-v">Convergent</div></div>
+    <div class="spec-card"><div class="sc-l">Valve actuation</div><div class="sc-v">Servo (remote)</div></div>
+    <div class="spec-card"><div class="sc-l">Flow model</div><div class="sc-v">Quasi-steady 1D</div></div>
+    <div class="spec-card"><div class="sc-l">Process type</div><div class="sc-v">Blowdown</div></div>
+  </div>
+  <div class="innov-grid" style="margin-top:1rem;">
+    <div class="innov-card"><div class="ic-icon">🔵</div><div class="ic-title">Custom nozzle geometry</div><div class="ic-desc">Convergent nozzle optimized for maximum thrust efficiency from available pressure energy.</div></div>
+    <div class="innov-card"><div class="ic-icon">📡</div><div class="ic-title">Remote servo valve</div><div class="ic-desc">Wireless actuation with finite opening time for realistic thrust ramp-up.</div></div>
+    <div class="innov-card"><div class="ic-icon">⚖️</div><div class="ic-title">Lightweight chassis</div><div class="ic-desc">Full aluminum construction minimizes mass while maintaining structural integrity.</div></div>
+    <div class="innov-card"><div class="ic-icon">🛑</div><div class="ic-title">Motorized braking</div><div class="ic-desc">Precision motorized brake system with calculated torque of 1.4 Nm per shaft.</div></div>
+  </div>
+  <div class="upload-section" id="photo-section">
+    <h3>📸 Upload vehicle photos</h3>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:1rem;">Add photos of your vehicle for the brochure gallery.</p>
+    <label for="file-input">
+      <div class="drop-zone">
+        <p>☁ Click to upload photos</p>
+        <small>JPG, PNG, WEBP — multiple files allowed</small>
+      </div>
+    </label>
+    <input type="file" id="file-input" accept="image/*" multiple onchange="handleFiles(this.files)">
+    <div class="photo-grid" id="photo-grid"></div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- LEADERBOARD -->
+<section class="section" id="leaderboard">
+  <div class="section-eyebrow">Competition results</div>
+  <h2>Run leaderboard</h2>
+  <p style="font-size:13px;color:var(--muted);margin-bottom:1.5rem;">Live results from all competition runs. PI = 100 × (0.6·St + 0.2·Sd + 0.2·Sm)</p>
+  <div style="overflow-x:auto;">
+    <table class="lb-table" id="lb-table">
+      <thead>
+        <tr>
+          <th>Rank</th>
+          <th>Name</th>
+          <th>Vehicle</th>
+          <th>Time (s)</th>
+          <th>Brake dist. (m)</th>
+          <th>Weight (kg)</th>
+          <th>PI score</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="lb-body"></tbody>
+    </table>
+  </div>
+  <button class="add-result-btn" onclick="openModal()" id="add-result-btn" style="display:none;">+ Add run result</button>
+  <p style="font-size:12px;color:var(--muted);margin-top:8px;" id="lb-hint"></p>
+</section>
+
+<div class="divider"></div>
+
+<!-- PERFORMANCE -->
+<section class="section" id="performance">
+  <div class="section-eyebrow">5.0 — Performance</div>
+  <h2>Scoring targets</h2>
+  <div class="perf-grid">
+    <div class="perf-card"><div class="pc-val">&lt;10s</div><div class="pc-lbl">Target course time</div><div class="pc-best">✓ Best possible: 3 s</div></div>
+    <div class="perf-card"><div class="pc-val">&lt;1 m</div><div class="pc-lbl">Target braking distance</div><div class="pc-best">✓ Best possible: 0.05 m</div></div>
+    <div class="perf-card"><div class="pc-val">&lt;3 kg</div><div class="pc-lbl">Target vehicle weight</div><div class="pc-best">✓ Best possible: 0.5 kg</div></div>
+  </div>
+  <div class="section-eyebrow" style="margin-bottom:1rem;">PI formula weighting</div>
+  <div class="bar-wrap"><div class="bar-top"><span>Speed (St)</span><span style="color:var(--blue);font-weight:500;">60%</span></div><div class="bar-bg"><div class="bar-fill" style="width:60%;background:var(--blue);"></div></div></div>
+  <div class="bar-wrap"><div class="bar-top"><span>Braking distance (Sd)</span><span style="color:var(--teal);font-weight:500;">20%</span></div><div class="bar-bg"><div class="bar-fill" style="width:20%;background:var(--teal);"></div></div></div>
+  <div class="bar-wrap"><div class="bar-top"><span>Vehicle weight (Sm)</span><span style="color:var(--amber);font-weight:500;">20%</span></div><div class="bar-bg"><div class="bar-fill" style="width:20%;background:var(--amber);"></div></div></div>
+  <p style="font-size:12px;color:var(--muted);margin-top:1rem;">PI = 100 × (0.6·St + 0.2·Sd + 0.2·Sm) — scored against thresholds defined by the judging committee.</p>
+</section>
+
+<div class="divider"></div>
+
+<!-- TEAM -->
+<section class="section" id="team">
+  <div class="section-eyebrow">The team</div>
+  <h2>Meet the engineers</h2>
+  <div class="team-grid">
+    <div class="team-card"><div class="t-avatar">DA</div><div class="t-name">Daniel Amgad Habib</div><div class="t-id">22P090</div><div class="t-role">Mechanical</div></div>
+    <div class="team-card"><div class="t-avatar">FF</div><div class="t-name">Fady Fayez</div><div class="t-id">22P0116</div><div class="t-role">Fluid dynamics</div></div>
+    <div class="team-card"><div class="t-avatar">OA</div><div class="t-name">Omar Abobakr</div><div class="t-id">22P0054</div><div class="t-role">Manufacturing</div></div>
+    <div class="team-card"><div class="t-avatar">SA</div><div class="t-name">Seifallah Ahmed</div><div class="t-id">22P0152</div><div class="t-role">Electrical</div></div>
+    <div class="team-card"><div class="t-avatar">AA</div><div class="t-name">Abdelrahman Ahmed</div><div class="t-id">2200444</div><div class="t-role">Software</div></div>
+    <div class="team-card"><div class="t-avatar">KS</div><div class="t-name">Karim Shehab</div><div class="t-id">22P0208</div><div class="t-role">Project manager</div></div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- TRIVIA -->
+<section class="section" id="trivia">
+  <div class="section-eyebrow">Engineering challenge</div>
+  <h2>Can you answer these?</h2>
+  <div class="trivia-box">
+    <h3>💡 Pneumatics & machine design trivia</h3>
+    <div class="trivia-item"><span class="q">What pressure ratio is needed to choke a convergent nozzle?</span><button class="reveal-btn" onclick="reveal(this,'P/Pa > 1.893')">Reveal</button></div>
+    <div class="trivia-item"><span class="q">In a thick cylinder, what is the ratio of hoop stress to longitudinal stress?</span><button class="reveal-btn" onclick="reveal(this,'2 : 1')">Reveal</button></div>
+    <div class="trivia-item"><span class="q">What physical law governs nozzle thrust generation?</span><button class="reveal-btn" onclick="reveal(this,&quot;Newton's 3rd Law&quot;)">Reveal</button></div>
+    <div class="trivia-item"><span class="q">What does PI stand for in the competition scoring formula?</span><button class="reveal-btn" onclick="reveal(this,'Performance Index')">Reveal</button></div>
+    <div class="trivia-item"><span class="q">What is the best possible competition time that scores maximum points?</span><button class="reveal-btn" onclick="reveal(this,'3 seconds')">Reveal</button></div>
+  </div>
+</section>
+
+<!-- DARE -->
+<section class="dare-section">
+  <h2>Think you can beat us?</h2>
+  <p>We engineered Drive X to target a Performance Index of:</p>
+  <div class="pi-display"><div class="pi-val">75+</div><div class="pi-label">Performance Index out of 100</div></div>
+  <p style="font-size:13px;">Built from aluminum · Powered by air · Engineered to win</p>
+</section>
+
+<!-- ORDER YOUR CAR -->
+<section class="order-section" id="order">
+  <div class="order-inner">
+    <div class="section-eyebrow">Custom orders</div>
+    <h2>Design your own air-powered car</h2>
+    <p class="order-sub">We design and manufacture custom air-powered vehicles. Tell us your specifications — color, features, and performance goals — and we'll build it for you.</p>
+
+    <div class="order-grid" id="order-form">
+      <div class="form-group"><label class="o-label">Your full name</label><input class="o-input" type="text" id="o-name" placeholder="e.g. Ahmed Mohamed"></div>
+      <div class="form-group"><label class="o-label">Your email</label><input class="o-input" type="email" id="o-email" placeholder="e.g. ahmed@email.com"></div>
+      <div class="form-group"><label class="o-label">Phone number</label><input class="o-input" type="tel" id="o-phone" placeholder="e.g. 010xxxxxxxx"></div>
+      <div class="form-group"><label class="o-label">Car name / model</label><input class="o-input" type="text" id="o-carname" placeholder="e.g. SpeedDemon X1"></div>
+      <div class="form-group full"><label class="o-label">Chassis color</label>
+        <div class="color-row" id="color-row">
+          <div class="color-swatch selected" style="background:#0d1b2e;" data-color="Navy" onclick="selectColor(this)"></div>
+          <div class="color-swatch" style="background:#C0392B;" data-color="Red" onclick="selectColor(this)"></div>
+          <div class="color-swatch" style="background:#1D6FA4;" data-color="Blue" onclick="selectColor(this)"></div>
+          <div class="color-swatch" style="background:#1E8449;" data-color="Green" onclick="selectColor(this)"></div>
+          <div class="color-swatch" style="background:#D4AC0D;" data-color="Yellow" onclick="selectColor(this)"></div>
+          <div class="color-swatch" style="background:#797D7F;" data-color="Silver" onclick="selectColor(this)"></div>
+          <div class="color-swatch" style="background:#1a1a1a;" data-color="Matte Black" onclick="selectColor(this)"></div>
+          <div class="color-swatch" style="background:#ffffff;border:2px solid #dde3ec;" data-color="White" onclick="selectColor(this)"></div>
+        </div>
+        <p style="font-size:11px;color:var(--blue-light);margin-top:6px;" id="color-label">Selected: Navy</p>
+      </div>
+      <div class="form-group full"><label class="o-label">Propulsion type</label>
+        <select class="o-input" id="o-propulsion">
+          <option value="Convergent nozzle (standard)">Convergent nozzle (standard)</option>
+          <option value="Air motor (turbine)">Air motor / turbine</option>
+          <option value="Multi-nozzle array">Multi-nozzle array</option>
+          <option value="Custom (specify in notes)">Custom — specify in notes</option>
+        </select>
+      </div>
+      <div class="form-group full"><label class="o-label">Additional features</label>
+        <div class="feature-grid">
+          <label class="feature-check"><input type="checkbox" id="f1"> Wireless telemetry display</label>
+          <label class="feature-check"><input type="checkbox" id="f2"> Carbon fiber body panels</label>
+          <label class="feature-check"><input type="checkbox" id="f3"> Dual motorized brakes</label>
+          <label class="feature-check"><input type="checkbox" id="f4"> Custom laser engraving</label>
+          <label class="feature-check"><input type="checkbox" id="f5"> Pressure gauge display</label>
+          <label class="feature-check"><input type="checkbox" id="f6"> LED underglow lighting</label>
+        </div>
+      </div>
+      <div class="form-group"><label class="o-label">Tank volume (max 4 L)</label>
+        <select class="o-input" id="o-tank">
+          <option value="2 L">2 L</option>
+          <option value="3 L">3 L</option>
+          <option value="4 L" selected>4 L (maximum)</option>
+        </select>
+      </div>
+      <div class="form-group"><label class="o-label">Target weight class</label>
+        <select class="o-input" id="o-weight">
+          <option value="Ultra-light (<2 kg)">Ultra-light (&lt;2 kg)</option>
+          <option value="Standard (2–4 kg)" selected>Standard (2–4 kg)</option>
+          <option value="Heavy-duty (4–6 kg)">Heavy-duty (4–6 kg)</option>
+        </select>
+      </div>
+      <div class="form-group full"><label class="o-label">Special notes / requests</label><textarea class="o-input" id="o-notes" placeholder="Any specific design requests, dimensions, logo engraving text, delivery requirements..."></textarea></div>
+      <div class="full"><button class="submit-order" onclick="submitOrder()">Submit custom order →</button></div>
+    </div>
+
+    <div class="order-success" id="order-success">
+      <h3>✓ Order received!</h3>
+      <p>Thank you! We've received your custom car order and will contact you within 48 hours to confirm specifications and pricing.</p>
+    </div>
+
+    <div class="orders-list" id="orders-list" style="display:none;">
+      <h3>📋 All submitted orders</h3>
+      <div id="orders-container"></div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <strong>Drive X</strong> — Air-Powered Vehicle Team<br>
+  Ain Shams University · Faculty of Engineering · Mechanical Engineering Programs<br>
+  Machine Elements Design (MDP211 / MDP311) · Spring 2026<br>
+  Competition date: Wednesday 24 June 2026
+</footer>
+
+<script>
+const TEAM_USERS = [
+  {username:'daniel',password:'22P090',name:'Daniel Amgad Habib',id:'22P090',role:'Mechanical',isTeam:true},
+  {username:'fady',password:'22P0116',name:'Fady Fayez',id:'22P0116',role:'Fluid dynamics',isTeam:true},
+  {username:'omar',password:'22P0054',name:'Omar Abobakr',id:'22P0054',role:'Manufacturing',isTeam:true},
+  {username:'seif',password:'22P0152',name:'Seifallah Ahmed',id:'22P0152',role:'Electrical',isTeam:true},
+  {username:'abdelrahman',password:'2200444',name:'Abdelrahman Ahmed',id:'2200444',role:'Software',isTeam:true},
+  {username:'karim',password:'22P0208',name:'Karim Shehab',id:'22P0208',role:'Project manager',isTeam:true},
+];
+
+let users = JSON.parse(localStorage.getItem('dx_users')||'null') || [...TEAM_USERS];
+let results = JSON.parse(localStorage.getItem('dx_results')||'null') || [
+  {name:'Daniel Amgad Habib',car:'Drive X',time:7.2,brake:0.65,weight:2.1,status:'Completed'},
+  {name:'Fady Fayez',car:'Drive X',time:8.5,brake:0.9,weight:2.3,status:'Completed'},
+  {name:'Omar Abobakr',car:'SpeedForce',time:6.8,brake:0.5,weight:1.9,status:'Completed'},
+  {name:'Guest User',car:'PneumoX',time:12.1,brake:1.4,weight:3.2,status:'Completed'},
+];
+let orders = JSON.parse(localStorage.getItem('dx_orders')||'[]');
+let currentUser = JSON.parse(sessionStorage.getItem('dx_current')||'null');
+let selectedColor = 'Navy';
+let photos = [];
+
+function saveUsers(){localStorage.setItem('dx_users',JSON.stringify(users));}
+function saveResults(){localStorage.setItem('dx_results',JSON.stringify(results));}
+function saveOrders(){localStorage.setItem('dx_orders',JSON.stringify(orders));}
+
+function calcPI(t,d,w){
+  const St = Math.max(0,Math.min(1,(40-t)/(40-3)));
+  const Sd = Math.max(0,Math.min(1,(5-d)/(5-0.05)));
+  const Sm = Math.max(0,Math.min(1,(10-w)/(10-0.5)));
+  return Math.round(100*(0.6*St+0.2*Sd+0.2*Sm));
+}
+
+function renderLeaderboard(){
+  const scored = results.map(r=>({...r,pi:calcPI(r.time,r.brake,r.weight)}));
+  scored.sort((a,b)=>b.pi-a.pi);
+  const body = document.getElementById('lb-body');
+  body.innerHTML = scored.map((r,i)=>{
+    const rankClass = i===0?'rank-1':i===1?'rank-2':i===2?'rank-3':'';
+    const medal = i===0?'🥇':i===1?'🥈':i===2?'🥉':'';
+    return `<tr>
+      <td class="${rankClass}">${medal} ${i+1}</td>
+      <td style="font-weight:500;">${r.name}</td>
+      <td style="color:var(--muted);">${r.car}</td>
+      <td><span class="time-badge">${r.time.toFixed(2)} s</span></td>
+      <td>${r.brake.toFixed(2)} m</td>
+      <td>${r.weight.toFixed(1)} kg</td>
+      <td><span class="pi-badge">${r.pi}</span></td>
+      <td><span class="status-badge status-done">${r.status}</span></td>
+    </tr>`;
+  }).join('');
+}
+
+function openModal(){document.getElementById('result-modal').classList.add('open');}
+function closeModal(){document.getElementById('result-modal').classList.remove('open');}
+
+function addResult(){
+  const name = document.getElementById('r-name').value.trim();
+  const car = document.getElementById('r-car').value.trim();
+  const time = parseFloat(document.getElementById('r-time').value);
+  const brake = parseFloat(document.getElementById('r-brake').value);
+  const weight = parseFloat(document.getElementById('r-weight').value);
+  if(!name||!car||isNaN(time)||isNaN(brake)||isNaN(weight)){alert('Please fill all fields.');return;}
+  results.push({name,car,time,brake,weight,status:'Completed'});
+  saveResults();
+  renderLeaderboard();
+  closeModal();
+  document.getElementById('r-name').value='';
+  document.getElementById('r-car').value='';
+  document.getElementById('r-time').value='';
+  document.getElementById('r-brake').value='';
+  document.getElementById('r-weight').value='';
+}
+
+function showError(msg){
+  const el=document.getElementById('auth-error');
+  el.textContent=msg;el.style.display='block';
+  document.getElementById('auth-success').style.display='none';
+}
+function showSuccess(msg){
+  const el=document.getElementById('auth-success');
+  el.textContent=msg;el.style.display='block';
+  document.getElementById('auth-error').style.display='none';
+}
+
+function switchAuthTab(tab){
+  document.getElementById('login-form').style.display=tab==='login'?'block':'none';
+  document.getElementById('register-form').style.display=tab==='register'?'block':'none';
+  document.querySelectorAll('.auth-tab').forEach((t,i)=>t.classList.toggle('active',(i===0&&tab==='login')||(i===1&&tab==='register')));
+  document.getElementById('auth-error').style.display='none';
+  document.getElementById('auth-success').style.display='none';
+}
+
+function login(){
+  const u=document.getElementById('login-user').value.trim().toLowerCase();
+  const p=document.getElementById('login-pass').value.trim();
+  if(!u||!p){showError('Please fill in both fields.');return;}
+  const user=users.find(x=>x.username.toLowerCase()===u&&x.password===p);
+  if(!user){showError('Incorrect username or password.');return;}
+  sessionStorage.setItem('dx_current',JSON.stringify(user));
+  currentUser=user;
+  enterSite();
+}
+
+function register(){
+  const name=document.getElementById('reg-name').value.trim();
+  const sid=document.getElementById('reg-id').value.trim();
+  const u=document.getElementById('reg-user').value.trim().toLowerCase();
+  const p=document.getElementById('reg-pass').value.trim();
+  const role=document.getElementById('reg-role').value;
+  if(!name||!u||!p){showError('Please fill in all required fields.');return;}
+  if(users.find(x=>x.username.toLowerCase()===u)){showError('Username already taken.');return;}
+  const newUser={username:u,password:p,name,id:sid,role,isTeam:false};
+  users.push(newUser);saveUsers();
+  showSuccess('Account created! You can now sign in.');
+  setTimeout(()=>switchAuthTab('login'),1500);
+}
+
+function enterSite(){
+  document.getElementById('auth-overlay').style.opacity='0';
+  setTimeout(()=>document.getElementById('auth-overlay').style.display='none',400);
+  const initials=currentUser.name.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
+  document.getElementById('nav-avatar').textContent=initials;
+  document.getElementById('nav-username').textContent=currentUser.name.split(' ')[0];
+  if(currentUser.isTeam){
+    document.getElementById('add-result-btn').style.display='inline-block';
+    document.getElementById('lb-hint').textContent='Signed in as team member — you can add run results.';
+    document.getElementById('orders-list').style.display='block';
+    renderOrders();
+  } else {
+    document.getElementById('lb-hint').textContent='Sign in as a team member to add results.';
+  }
+  renderLeaderboard();
+}
+
+function logout(){
+  sessionStorage.removeItem('dx_current');currentUser=null;
+  document.getElementById('auth-overlay').style.display='flex';
+  document.getElementById('auth-overlay').style.opacity='1';
+  document.getElementById('login-user').value='';
+  document.getElementById('login-pass').value='';
+  document.getElementById('auth-error').style.display='none';
+  document.getElementById('auth-success').style.display='none';
+  document.getElementById('add-result-btn').style.display='none';
+  document.getElementById('orders-list').style.display='none';
+}
+
+function reveal(btn,answer){btn.textContent=answer;btn.classList.add('revealed');btn.onclick=null;}
+
+function selectColor(el){
+  document.querySelectorAll('.color-swatch').forEach(s=>s.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedColor=el.dataset.color;
+  document.getElementById('color-label').textContent='Selected: '+selectedColor;
+}
+
+function submitOrder(){
+  const name=document.getElementById('o-name').value.trim();
+  const email=document.getElementById('o-email').value.trim();
+  const phone=document.getElementById('o-phone').value.trim();
+  const carname=document.getElementById('o-carname').value.trim();
+  if(!name||!email){alert('Please enter your name and email.');return;}
+  const features=[];
+  ['Wireless telemetry display','Carbon fiber body panels','Dual motorized brakes','Custom laser engraving','Pressure gauge display','LED underglow lighting']
+    .forEach((f,i)=>{if(document.getElementById('f'+(i+1)).checked)features.push(f);});
+  const order={
+    id:'ORD-'+Date.now(),
+    name,email,phone,
+    car:carname||'Custom Vehicle',
+    color:selectedColor,
+    propulsion:document.getElementById('o-propulsion').value,
+    tank:document.getElementById('o-tank').value,
+    weight:document.getElementById('o-weight').value,
+    features,
+    notes:document.getElementById('o-notes').value.trim(),
+    date:new Date().toLocaleDateString('en-GB'),
+    status:'Pending'
+  };
+  orders.push(order);saveOrders();
+  document.getElementById('order-success').style.display='block';
+  document.getElementById('order-form').style.opacity='0.3';
+  document.getElementById('order-form').style.pointerEvents='none';
+  if(currentUser&&currentUser.isTeam){renderOrders();}
+}
+
+function renderOrders(){
+  const c=document.getElementById('orders-container');
+  if(!orders.length){c.innerHTML='<p style="color:var(--blue-pale);font-size:13px;">No orders yet.</p>';return;}
+  c.innerHTML=orders.map(o=>`
+    <div class="order-card">
+      <div>
+        <div class="oc-name">${o.name} — ${o.car}</div>
+        <div class="oc-detail">${o.color} · ${o.propulsion} · ${o.tank} · ${o.date}</div>
+        <div class="oc-detail" style="margin-top:3px;">${o.features.length?o.features.join(', '):'No extra features'}</div>
+        ${o.notes?`<div class="oc-detail" style="margin-top:3px;font-style:italic;">"${o.notes}"</div>`:''}
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <div class="oc-dot" style="background:var(--amber);"></div>
+        <span style="font-size:12px;color:var(--amber);font-weight:500;">${o.status}</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+function handleFiles(files){
+  Array.from(files).forEach(f=>{
+    const reader=new FileReader();
+    reader.onload=e=>{photos.push(e.target.result);renderPhotos();};
+    reader.readAsDataURL(f);
+  });
+}
+function renderPhotos(){
+  const grid=document.getElementById('photo-grid');
+  grid.innerHTML=photos.map((src,i)=>`<div class="photo-thumb"><img src="${src}" alt="Photo ${i+1}"><button class="rm" onclick="removePhoto(${i})">×</button></div>`).join('');
+}
+function removePhoto(i){photos.splice(i,1);renderPhotos();}
+
+if(currentUser){enterSite();}
+else{renderLeaderboard();}
+</script>
+</body>
+</html>
